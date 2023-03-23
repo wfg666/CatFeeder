@@ -35,12 +35,11 @@ def get_args_parser():
     parser.add_argument('--start_epoch', default=0, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float, help='gradient clipping max norm')
     parser.add_argument('--backbone', default='resnet18', type=str)
-    parser.add_argument('--eval', default=False, type=bool)
-    parser.add_argument('--device', default='cuda', type=str, help='device to use for training / testing')
+    parser.add_argument('--device', default='cuda', type=str, help='device to use for training')
     parser.add_argument('--resume', default='', type=str, help='resume model path')
     parser.add_argument('--output_dir', default='output', type=str, help='path where to save, empty for no saving')
     parser.add_argument('--gpu_list', default='1', type=str, help='gpu list for using')
-    parser.add_argument('--pretrained_model', default='pretrain/resnet18-5c106cde.pth', type=str, help='pretrain model for using')
+    parser.add_argument('--pretrained_model', default='pretrain/resnet18-5c106cde.pth', type=str)
     parser.add_argument('--data_path', default='../data/train', type=str, help='path for training data')
     return parser
 
@@ -56,7 +55,6 @@ def build_data_loader(args):
 
 def train_one_epoch(model, data_loader, lr_scheduler, optimizer,
                     device, epoch, max_norm = 0):
-
     for idx, (samples, targets) in enumerate(data_loader):
         samples = samples.to(device)
         targets = targets.to(device)
@@ -75,6 +73,7 @@ def train_one_epoch(model, data_loader, lr_scheduler, optimizer,
             logger.info(info)
     return
 
+
 def main(args):
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_list
 
@@ -85,7 +84,7 @@ def main(args):
     train_loader = build_data_loader(args)
 
     # build model
-    model = model_build.build(args)
+    model = model_build.build(args, True)
 
     # optimizer and lr_scheduler
     if args.optimizer == 'SGD':
@@ -104,7 +103,7 @@ def main(args):
         print('resume from {}'.format(args.resume))
         checkpoint = torch.load(args.resume, map_location='cpu')
         model.load_state_dict(checkpoint['model'])
-        if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
+        if 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             optimizer.load_state_dict(checkpoint['optimizer'])
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             args.start_epoch = checkpoint['epoch'] + 1
@@ -112,18 +111,15 @@ def main(args):
     # start training
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
-        train_stats = train_one_epoch(
-            model, train_loader, lr_scheduler, optimizer, device, epoch,
-            args.clip_max_norm)
+        train_one_epoch(model, train_loader, lr_scheduler, optimizer, device, epoch, args.clip_max_norm)
         lr_scheduler.step()
         if args.output_dir:
             if not os.path.isdir(args.output_dir):
                 os.system('mkdir {}'.format(args.output_dir))
             if not os.path.isdir(osp.join(args.output_dir, ts)):
                 os.system('mkdir {}/{}'.format(args.output_dir, ts))
-            if (epoch + 1) % 10 == 0:
+            if (epoch + 1) % 20 == 0:
                 checkpoint_path = osp.join(args.output_dir, ts, 'checkpoint{}.pth'.format('%05d'%epoch))
-                 # extra checkpoint before LR drop and every 100 epochs
                 torch.save({
                     'model': model.state_dict(),
                     'optimizer': optimizer.state_dict(),
@@ -132,27 +128,14 @@ def main(args):
                     'args': args,
                 }, checkpoint_path)
 
-        # test_stats, coco_evaluator = evaluate(
-        #     model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
-        # )
-
-        # log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-        #              **{f'test_{k}': v for k, v in test_stats.items()},
-        #              'epoch': epoch,
-        #              'n_parameters': n_parameters}
-
-        # if args.output_dir and utils.is_main_process():
-        #     with (output_dir / "log.txt").open("a") as f:
-        #         f.write(json.dumps(log_stats) + "\n")
-
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     logger.info('Training time {}'.format(total_time_str))
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser('qrcode segmentation training and evaluation script', parents=[get_args_parser()])
+    parser = argparse.ArgumentParser('Cat feeder training script', parents=[get_args_parser()])
     args = parser.parse_args()
-    # if args.output_dir:
-    #     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+    print(args)
+
     main(args)
