@@ -5,14 +5,11 @@
 import torch
 from torch import nn
 
-
 # from model.backbone.mobilenetv2 import *
-# from model.backbone.mobilenetv2_diy import *
 # from model.backbone.alexnet import AlexNet
 from model.backbone.alexnet import AlexNet
 from model.backbone.resnet import ResNet, BasicBlock
 from collections import OrderedDict
-
 
 
 class class_model(nn.Module):
@@ -28,10 +25,8 @@ class class_model(nn.Module):
 
     def forward(self, data, label=None):
         if self.is_training:
-            shape = data[0].shape
             feature = self.backbone(data[0])
         else:
-            shape = data.shape
             feature = self.backbone(data)
         pred = self.classifier(feature)
 
@@ -46,7 +41,7 @@ def class_loss(pred_obj, label_obj, training_mask=None, select_label=None):
     return torch.nn.functional.nll_loss(torch.nn.functional.log_softmax(pred_obj, dim=1), label_obj)
 
 
-def build(args=None):
+def build(args=None, is_training=False):
     if args is None or args.backbone == 'alexnet':
         backbone = AlexNet(args.class_num);
         classifier = nn.Sequential(
@@ -66,7 +61,7 @@ def build(args=None):
             ])
         )
     
-    m = class_model(backbone, classifier, args.class_num, class_loss, not args.eval);
+    m = class_model(backbone, classifier, args.class_num, class_loss, is_training);
 
     if args.pretrained_model:
         pretrained_dict = torch.load(args.pretrained_model)
@@ -81,10 +76,8 @@ if __name__ == '__main__':
     # for p in m.parameters():
     #     print(p.shape)
 
-    # backbone = alexnet(True, model_root)
     backbone = AlexNet(3);
     m = class_model(backbone, 3, class_loss)
     for p in m.parameters():
         print(p.shape)
-
     print(m)
