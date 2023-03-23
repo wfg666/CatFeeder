@@ -75,6 +75,8 @@ def train_one_epoch(model, data_loader, lr_scheduler, optimizer,
 
 
 def main(args):
+    torch.cuda.is_available()
+    
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_list
 
     device = torch.device(args.device)
