@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import argparse
 
 import os
@@ -22,6 +25,7 @@ class Predicter:
         return parser
     
     def __init__(self, model_path=None):
+        torch.cuda.is_available()
         parser = self.get_args_parser()
         self.args, unknown = parser.parse_known_args()
         if model_path:
