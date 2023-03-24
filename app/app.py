@@ -35,7 +35,7 @@ def main():
     print_interval = 5  # 打印状态间隔（秒）
     time_last_print = time.time()  # 上一次打印状态的时间
 
-    time.sleep(5)
+    time.sleep(1)
     while True:
         # 读一张图片
         ret, frame = cam.read()
@@ -75,6 +75,6 @@ def main():
             predict_count = 0
             time_last_print = time.time()  # 记录打印时间
        
-        time.sleep(0.1)
+        time.sleep(0.01)
 if __name__ == '__main__':
     main()

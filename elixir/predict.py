@@ -17,7 +17,7 @@ class Predicter:
         parser.add_argument('--class_num', default=3, type=int)
         parser.add_argument('--backbone', default='resnet18', type=str)
         parser.add_argument('--device', default='cuda', type=str, help='device to use for training / testing')
-        parser.add_argument('--gpu_list', default='1', type=str, help='gpu list for using')
+        parser.add_argument('--gpu_list', default='0', type=str, help='gpu list for using')
         parser.add_argument('--pretrained_model', default='output/20230321_1755/checkpoint00599.pth', type=str,
                             help='model for testing')
         parser.add_argument('--input_size1', default=224, type=int, help='image width')
@@ -25,22 +25,25 @@ class Predicter:
         return parser
     
     def __init__(self, model_path=None):
-        torch.cuda.is_available()
+        print("parsing arguments")
         parser = self.get_args_parser()
         self.args, unknown = parser.parse_known_args()
         if model_path:
             self.args.pretrained_model = model_path
             
+        print("checking cuda")
+        torch.cuda.is_available()
         os.environ['CUDA_VISIBLE_DEVICES'] = self.args.gpu_list
         device = torch.device(self.args.device)
         print(device)
 
+        print("building model")
         model = model_build.build(self.args)
         if self.args.pretrained_model:
-            print("load pretrained model from {}".format(self.args.pretrained_model))
+            print("load model parameters from {}".format(self.args.pretrained_model))
             pretrained_dict = torch.load(self.args.pretrained_model, map_location=lambda storage, loc: storage.cuda(device))
             model.load_state_dict(pretrained_dict['model'], strict=True)
-
+        print("moving model to cuda eval")    
         self.model = model.cuda().eval()
 
     def predict(self, image):
