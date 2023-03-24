@@ -38,7 +38,7 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda', type=str, help='device to use for training')
     parser.add_argument('--resume', default='', type=str, help='resume model path')
     parser.add_argument('--output_dir', default='output', type=str, help='path where to save, empty for no saving')
-    parser.add_argument('--gpu_list', default='1', type=str, help='gpu list for using')
+    parser.add_argument('--gpu_list', default='0', type=str, help='gpu list for using')
     parser.add_argument('--pretrained_model', default='pretrain/resnet18-5c106cde.pth', type=str)
     parser.add_argument('--data_path', default='../data/train', type=str, help='path for training data')
     return parser

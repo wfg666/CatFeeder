@@ -18,7 +18,7 @@ def get_args_parser():
     parser.add_argument('--backbone', default='resnet18', type=str)
     parser.add_argument('--device', default='cuda', type=str, help='device to use for training / testing')
     parser.add_argument('--output_dir', default='output', type=str, help='path where to save, empty for no saving')
-    parser.add_argument('--gpu_list', default='1', type=str, help='gpu list for using')
+    parser.add_argument('--gpu_list', default='0', type=str, help='gpu list for using')
     parser.add_argument('--pretrained_model', default='output/20230321_1755/checkpoint00599.pth', type=str,
                         help='model for testing')
     parser.add_argument('--path', default='../data/test', type=str)
