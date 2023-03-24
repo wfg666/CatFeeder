@@ -1,0 +1,10 @@
+cmake-build-debug/
+cmake-build-minsizerel/
+cmake-build-release/
+cmake-build-relwithdebinfo/
+.idea/
+
+!cmake-build-debug/mcu_uart2pwm.elf
+!cmake-build-debug/mcu_uart2pwm.hex
+!cmake-build-debug/mcu_uart2pwm.bin
+
