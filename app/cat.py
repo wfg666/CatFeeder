@@ -28,7 +28,7 @@ class Cat:
         now = time.time()
         
         # 刚喂过
-        if len(self.feed_history)>0 and now - self.feed_history[0] < self.min_feed_interval:
+        if len(self.feed_history)>0 and now - self.feed_history[-1] < self.min_feed_interval:
             return False
         
         # 这个小时已经吃了很多了
