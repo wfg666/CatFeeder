@@ -3,28 +3,28 @@
 
 import cv2
 import sys
-from cat import Cat
-sys.path.append("../elixir")
-from predict import Predicter
-from utils import logger
-
 import os
 import time
+from cat import Cat
+
 import servo_controller
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../elixir')))
+from predict import Predicter
+import logger
 
 def main():
-    predicter = Predicter("../elixir/pretrain/maomaonet-359.pth")
-
+    predicter = Predicter(os.path.join(os.path.dirname(__file__), '../elixir/pretrain/maomaonet-359.pth'))
 
     cats = []
     cats.append(Cat("Monster", 60, 3, 10, 30))
     cats.append(Cat("216", 60, 2, 4, 10))
     
+    output_dir = 'output/app'
+    os.makedirs(output_dir, exist_ok=True)
     ts = time.strftime("%Y%m%d_%H%M", time.localtime())
-    os.makedirs('./output/log/', exist_ok=True)
-    log = logger.get_logger(filename='./output/log/train_{}.log'.format(ts))
-
+    log = logger.get_logger(filename=os.path.join(output_dir, 'app_{}.log'.format(ts)))
+    
     cam = cv2.VideoCapture(0)
 
     last_detected_cat = 0
@@ -38,13 +38,18 @@ def main():
     time.sleep(1)
     while True:
         # 读一张图片
-        ret, frame = cam.read()
-        if not ret:
-            log.error('failed to grab frame. release camera and reopen in 5s.')
-            cam.release()
-            time.sleep(5)
-            cam = cv2.VideoCapture(0)
-
+        try:
+            ret, frame = cam.read()
+            if not ret:
+                log.error('failed to grab frame. release camera and reopen in 5s.')
+                cam.release()
+                time.sleep(5)
+                cam = cv2.VideoCapture(0)
+                continue
+        except Exception as e:
+            log.error("failed to re initialize camera. " + e)
+            continue
+        
         # 检测一下猫猫
         detected_cat, prob = predicter.predict(frame)
 
@@ -74,6 +79,13 @@ def main():
             print("猫猫：%d 检测：%.1f fps." % (believed_cat, predict_count/(time.time() - time_last_print)))
             predict_count = 0
             time_last_print = time.time()  # 记录打印时间
+
+        
+        try:
+            cv2.imshow('cam', frame)
+            cv2.waitKey(1)
+        except Exception as e:
+            print('display fail.')
        
         time.sleep(0.01)
 if __name__ == '__main__':

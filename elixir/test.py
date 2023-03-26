@@ -1,14 +1,17 @@
-#
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# 
 #  Created by hwx on 2021/12/16
 #
 
 import argparse
 import os
 import time
-from utils import logger
 import datetime
 import cv2
 import numpy as np
+
+import logger
 from predict import Predicter
 
 
@@ -19,9 +22,8 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda', type=str, help='device to use for training / testing')
     parser.add_argument('--output_dir', default='output', type=str, help='path where to save, empty for no saving')
     parser.add_argument('--gpu_list', default='0', type=str, help='gpu list for using')
-    parser.add_argument('--pretrained_model', default='output/20230321_1755/checkpoint00599.pth', type=str,
-                        help='model for testing')
-    parser.add_argument('--path', default='../data/test', type=str)
+    parser.add_argument('--pretrained_model', default='output', type=str, help='model for testing')
+    parser.add_argument('--path', default=os.path.join(os.path.dirname(__file__), '../data/train'), type=str)
     parser.add_argument('--input_size1', default=224, type=int, help='image width')
     parser.add_argument('--input_size2', default=224, type=int, help='image height')
     return parser
