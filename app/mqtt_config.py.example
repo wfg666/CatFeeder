@@ -1,0 +1,6 @@
+host = "gz-3-mqtt.iot-api.com"
+port = 1883
+user = "abcdef1234567890"
+passwd = "AaBbCc1234"
+
+topic = "attributes"

@@ -1,3 +1,6 @@
 opencv-python 
-torch 
+torch
 pyserial
+paho-mqtt
+numpy
+Pillow
