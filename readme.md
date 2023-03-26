@@ -3,7 +3,8 @@
 #### If you'd like to make a feeder yourself, please open an issue and I'll be more than happy to write instructions.
 
 ## 效果图
-
+![demo](https://raw.githubusercontent.com/wfg666/CatFeeder/master/images/demo.gif "demo") 
+![cloud](https://raw.githubusercontent.com/wfg666/CatFeeder/master/images/cloud.png "cloud") 
 
 ## Jetson nano配置
 刷[镜像](https://github.com/Qengineering/Jetson-Nano-Ubuntu-20-image)，然后

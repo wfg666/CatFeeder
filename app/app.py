@@ -20,8 +20,8 @@ def main():
     mqtt = mqtt_uploader()
 
     cats = [
-        Cat("小怪兽", "Monster", 90, 3, 6, 12),
-        Cat("216", "216", 60, 3, 5, 10)]
+        Cat("小怪兽", "Monster", 90, 5, 8, 24),
+        Cat("216", "216", 60, 5, 8, 20)]
 
     output_dir = 'output/app'
     os.makedirs(output_dir, exist_ok=True)
@@ -69,7 +69,7 @@ def main():
             cat_seen_count = 1
             last_detected_cat = detected_cat
 
-        if cat_seen_count >= 8 and detected_cat != believed_cat:
+        if cat_seen_count >= 12 and detected_cat != believed_cat:
             if detected_cat > 0:
                 log.info(cats[detected_cat - 1].name + "来了")
             else:
