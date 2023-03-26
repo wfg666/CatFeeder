@@ -43,7 +43,7 @@ def class_loss(pred_obj, label_obj, training_mask=None, select_label=None):
 
 def build(args=None, is_training=False):
     if args is None or args.backbone == 'alexnet':
-        backbone = AlexNet(args.class_num);
+        backbone = AlexNet(args.class_num)
         classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(256 * 6 * 6, 4096),

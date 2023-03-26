@@ -1,24 +1,23 @@
-# 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#  
 #  Created by hwx on 2021/12/16
 # 
 
 import argparse
-
 import os
-import os.path as osp
 import time
-
 import torch
-from torch.utils.data import DataLoader
 import datetime
 
 from model import model_build
 from dataset import data_reader
-from utils import logger
+import logger
 
 ts = time.strftime("%Y%m%d_%H%M", time.localtime())
-os.makedirs('./output/log/', exist_ok=True)
-logger = logger.get_logger(filename='./output/log/train_{}.log'.format(ts))
+output_dir = os.path.join('output', ts)
+os.makedirs(output_dir, exist_ok=True)
+logger = logger.get_logger(filename=os.path.join(output_dir, 'train.log'))
 
 
 def get_args_parser():
@@ -37,10 +36,9 @@ def get_args_parser():
     parser.add_argument('--backbone', default='resnet18', type=str)
     parser.add_argument('--device', default='cuda', type=str, help='device to use for training')
     parser.add_argument('--resume', default='', type=str, help='resume model path')
-    parser.add_argument('--output_dir', default='output', type=str, help='path where to save, empty for no saving')
     parser.add_argument('--gpu_list', default='0', type=str, help='gpu list for using')
-    parser.add_argument('--pretrained_model', default='pretrain/resnet18-5c106cde.pth', type=str)
-    parser.add_argument('--data_path', default='../data/train', type=str, help='path for training data')
+    parser.add_argument('--pretrained_model', default=os.path.join(os.path.dirname(__file__), 'pretrain/resnet18-5c106cde.pth'), type=str)
+    parser.add_argument('--data_path', default=os.path.join(os.path.dirname(__file__), '../data/train'), type=str, help='path for training data')
     return parser
 
 
@@ -49,7 +47,7 @@ def build_data_loader(args):
     train_dataset = data_reader.data_reader(args.data_path)
     logger.info("build dataset done")
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=1, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=1, shuffle=True)
     return train_loader
 
 
@@ -115,13 +113,9 @@ def main(args):
     for epoch in range(args.start_epoch, args.epochs):
         train_one_epoch(model, train_loader, lr_scheduler, optimizer, device, epoch, args.clip_max_norm)
         lr_scheduler.step()
-        if args.output_dir:
-            if not os.path.isdir(args.output_dir):
-                os.system('mkdir {}'.format(args.output_dir))
-            if not os.path.isdir(osp.join(args.output_dir, ts)):
-                os.system('mkdir {}/{}'.format(args.output_dir, ts))
-            if (epoch + 1) % 20 == 0:
-                checkpoint_path = osp.join(args.output_dir, ts, 'checkpoint{}.pth'.format('%05d'%epoch))
+
+        if (epoch + 1) % 20 == 0:
+                checkpoint_path = os.path.join(output_dir, 'checkpoint{}.pth'.format('%05d'%epoch))
                 torch.save({
                     'model': model.state_dict(),
                     'optimizer': optimizer.state_dict(),
@@ -138,6 +132,4 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Cat feeder training script', parents=[get_args_parser()])
     args = parser.parse_args()
-    print(args)
-
     main(args)

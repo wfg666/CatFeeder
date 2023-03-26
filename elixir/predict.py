@@ -4,8 +4,9 @@
 import argparse
 
 import os
-import time
 import torch
+import sys
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from model import model_build
 import numpy as np
