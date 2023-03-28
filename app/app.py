@@ -20,8 +20,8 @@ def main():
     mqtt = mqtt_uploader()
 
     cats = [
-        Cat("小怪兽", "Monster", 90, 5, 8, 24),
-        Cat("216", "216", 60, 5, 8, 20)]
+        Cat("小怪兽", "Monster", 80, 7, 20, 40),
+        Cat("216", "216", 50, 7, 15, 25)]
 
     output_dir = 'output/app'
     os.makedirs(output_dir, exist_ok=True)
@@ -34,8 +34,11 @@ def main():
     believed_cat = 0
     cat_seen_count = 0
 
+    time_last_save_photo = 0
+    save_photo_interval = 0.5
+
     predict_count = 0
-    print_interval = 5  # 打印状态间隔（秒）
+    print_interval = 30  # 打印状态间隔（秒）
     time_last_print = time.time()  # 上一次打印状态的时间
 
     time.sleep(1)
@@ -57,19 +60,21 @@ def main():
         detected_cat, prob = predicter.predict(frame)
 
         # 保存猫猫的帅照
-        if detected_cat:
+        if detected_cat and time.time() - time_last_save_photo >= save_photo_interval:
             pic_dir = os.path.join(output_dir, "pics", str(detected_cat))
             os.makedirs(pic_dir, exist_ok=True)
             cv2.imwrite(os.path.join(pic_dir, str(time.time()) + ".png"), frame)
+            time_last_save_photo = time.time()  # 记录打印时间
 
-        # 连续8帧检测到同一只猫猫才相信
+
+        # 连续10帧检测到同一只猫猫才相信
         if detected_cat == last_detected_cat:
             cat_seen_count += 1
         else:
             cat_seen_count = 1
             last_detected_cat = detected_cat
 
-        if cat_seen_count >= 12 and detected_cat != believed_cat:
+        if cat_seen_count >= 10 and detected_cat != believed_cat:
             if detected_cat > 0:
                 log.info(cats[detected_cat - 1].name + "来了")
             else:
@@ -88,6 +93,8 @@ def main():
         if time.time() - time_last_print >= print_interval:  # 检查是否到达打印间隔
             print("猫猫：%d 检测：%.1f fps." % (believed_cat, predict_count / (time.time() - time_last_print)))
             predict_count = 0
+            for cat in cats:
+                print(f"{cat.name}: {cat.feed_count_hour()}, {cat.feed_count_8h()}, {cat.feed_count_day()}")
             time_last_print = time.time()  # 记录打印时间
 
         try:
@@ -96,7 +103,7 @@ def main():
         except Exception as e:
             print('display fail.')
 
-        time.sleep(0.01)
+        time.sleep(0.02)
 
 
 if __name__ == '__main__':
