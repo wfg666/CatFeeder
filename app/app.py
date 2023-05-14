@@ -20,8 +20,9 @@ def main():
     mqtt = mqtt_uploader()
 
     cats = [
-        Cat("小怪兽", "Monster", 80, 7, 20, 40),
-        Cat("216", "216", 50, 7, 15, 25)]
+        Cat("小怪兽", "Monster", 130, 5, 66, 99),
+        Cat("216", "216", 55, 3, 6, 1)]
+        #Cat("216", "216", 55, 2, 2, 4)]
 
     output_dir = 'output/app'
     os.makedirs(output_dir, exist_ok=True)
@@ -35,7 +36,7 @@ def main():
     cat_seen_count = 0
 
     time_last_save_photo = 0
-    save_photo_interval = 0.5
+    save_photo_interval = 5.0
 
     predict_count = 0
     print_interval = 30  # 打印状态间隔（秒）
@@ -63,7 +64,8 @@ def main():
         if detected_cat and time.time() - time_last_save_photo >= save_photo_interval:
             pic_dir = os.path.join(output_dir, "pics", str(detected_cat))
             os.makedirs(pic_dir, exist_ok=True)
-            cv2.imwrite(os.path.join(pic_dir, str(time.time()) + ".png"), frame)
+            img = cv2.resize(frame,  (int(predicter.args.input_size1), int(predicter.args.input_size2)))
+            cv2.imwrite(os.path.join(pic_dir, str(time.time()) + ".png"), img)
             time_last_save_photo = time.time()  # 记录打印时间
 
 
@@ -91,10 +93,12 @@ def main():
         # 打log
         predict_count += 1  # 记录 get() 调用次数
         if time.time() - time_last_print >= print_interval:  # 检查是否到达打印间隔
-            print("猫猫：%d 检测：%.1f fps." % (believed_cat, predict_count / (time.time() - time_last_print)))
+            print("猫猫：%d 检测：%.1f fps." % (believed_cat, predict_count / (time.time() - time_last_print)), end = '  ')
             predict_count = 0
             for cat in cats:
-                print(f"{cat.name}: {cat.feed_count_hour()}, {cat.feed_count_8h()}, {cat.feed_count_day()}")
+                print(f"{cat.name}: {cat.feed_count_hour()}/{cat.max_feed_hour}, {cat.feed_count_8h()}/{cat.max_feed_8h}, "
+                    f"{cat.feed_count_day()}/{cat.max_feed_day}", end = "  ")
+            print('')
             time_last_print = time.time()  # 记录打印时间
 
         try:
