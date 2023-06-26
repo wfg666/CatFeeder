@@ -20,8 +20,9 @@ def main():
     mqtt = mqtt_uploader()
 
     cats = [
-        Cat("小怪兽", "Monster", 110, 6, 10, 15),
-        Cat("216", "216", 55, 4, 6, 8)]
+        Cat("小怪兽", "Monster", 130, 2, 6, 12),
+        Cat("216", "216", 55, 3, 6, 10)]
+        #Cat("216", "216", 55, 2, 2, 4)]
 
     output_dir = 'output/app'
     os.makedirs(output_dir, exist_ok=True)
@@ -35,7 +36,7 @@ def main():
     cat_seen_count = 0
 
     time_last_save_photo = 0
-    save_photo_interval = 0.5
+    save_photo_interval = 5.0
 
     predict_count = 0
     print_interval = 30  # 打印状态间隔（秒）
