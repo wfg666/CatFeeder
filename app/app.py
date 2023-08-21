@@ -20,8 +20,8 @@ def main():
     mqtt = mqtt_uploader()
 
     cats = [
-        Cat("小怪兽", "Monster", 130, 2, 6, 12),
-        Cat("216", "216", 55, 3, 6, 10)]
+        Cat("小怪兽", "Monster", 130, 2, 66, 99),
+        Cat("216", "216", 55, 3, 6, 1)]
         #Cat("216", "216", 55, 2, 2, 4)]
 
     output_dir = 'output/app'
