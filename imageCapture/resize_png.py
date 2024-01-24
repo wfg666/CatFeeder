@@ -20,7 +20,7 @@ TARGET_SIZE = (224, 224)  # 目标尺寸
 
 for root, dirs, files in os.walk(SOURCE_FOLDER):
     for file in files:
-        if file.endswith('.png'):
+        if file.endswith('.png') or file.endswith('.jpg') :
             file_path = os.path.join(root, file)
             with open(file_path, 'rb') as f:
                 img = Image.open(f)

@@ -5,10 +5,7 @@
 import torch
 from torch import nn
 
-# from model.backbone.mobilenetv2 import *
-# from model.backbone.alexnet import AlexNet
-from model.backbone.alexnet import AlexNet
-from model.backbone.resnet import ResNet, BasicBlock
+from model.resnet import ResNet, BasicBlock
 from collections import OrderedDict
 
 
@@ -20,7 +17,7 @@ class class_model(nn.Module):
         self.is_training = is_training
         self.loss = loss
         self.class_num = class_num
-        return;
+        return
 
 
     def forward(self, data, label=None):
@@ -42,24 +39,10 @@ def class_loss(pred_obj, label_obj, training_mask=None, select_label=None):
 
 
 def build(args=None, is_training=False):
-    if args is None or args.backbone == 'alexnet':
-        backbone = AlexNet(args.class_num)
-        classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Linear(4096, args.class_num),
-        )
-    elif args.backbone == 'resnet18':
-        backbone = ResNet(BasicBlock, [2, 2, 2, 2], args.class_num)
-        classifier = nn.Sequential(
-            OrderedDict([
-                ('fc', nn.Linear(512 * BasicBlock.expansion, args.class_num))
-            ])
-        )
+    backbone = ResNet(BasicBlock, [2, 2, 2, 2], args.class_num)
+    classifier = nn.Sequential(
+        OrderedDict([('fc', nn.Linear(512 * BasicBlock.expansion, args.class_num))])
+    )
     
     m = class_model(backbone, classifier, args.class_num, class_loss, is_training);
 
@@ -71,13 +54,13 @@ def build(args=None, is_training=False):
     return m
 
 if __name__ == '__main__':
-    # backbone = mobilenet_v2(used_layers=[1, 2, 3, 4, 5]);
-    # m = seg_model(backbone, 4, seg_loss.seg_loss)
-    # for p in m.parameters():
-    #     print(p.shape)
-
-    backbone = AlexNet(3);
-    m = class_model(backbone, 3, class_loss)
+    backbone = ResNet(BasicBlock, [2, 2, 2, 2], 2)
+    classifier = nn.Sequential(
+        OrderedDict([('fc', nn.Linear(512 * BasicBlock.expansion, 2))])
+    )
+    
+    m = class_model(backbone, classifier, 2, class_loss, True);
     for p in m.parameters():
         print(p.shape)
+
     print(m)

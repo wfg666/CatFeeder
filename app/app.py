@@ -21,8 +21,8 @@ def main():
 
     cats = [
         Cat("小怪兽", "Monster", 130, 5, 66, 99),
-        Cat("216", "216", 55, 3, 6, 1)]
-        #Cat("216", "216", 55, 2, 2, 4)]
+        # Cat("216", "216", 55, 3, 6, 1)
+        ]
 
     output_dir = 'output/app'
     os.makedirs(output_dir, exist_ok=True)
@@ -30,16 +30,21 @@ def main():
     log = logger.get_logger(filename=os.path.join(output_dir, 'app_{}.log'.format(ts)))
 
     cam = cv2.VideoCapture(0)
+    cam.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+    cam.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
 
     last_detected_cat = 0
     believed_cat = 0
     cat_seen_count = 0
 
     time_last_save_photo = 0
-    save_photo_interval = 5.0
+    save_photo_interval = 0.8
+
+    time_last_open = 0
+    open_door_interval = 2
 
     predict_count = 0
-    print_interval = 30  # 打印状态间隔（秒）
+    print_interval = 10  # 打印状态间隔（秒）
     time_last_print = time.time()  # 上一次打印状态的时间
 
     time.sleep(1)
@@ -52,6 +57,8 @@ def main():
                 cam.release()
                 time.sleep(5)
                 cam = cv2.VideoCapture(0)
+                cam.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+                cam.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
                 continue
         except Exception as e:
             log.error("failed to re initialize camera. " + e)
@@ -76,19 +83,20 @@ def main():
             cat_seen_count = 1
             last_detected_cat = detected_cat
 
-        if cat_seen_count >= 10 and detected_cat != believed_cat:
+        if cat_seen_count >= 7 and detected_cat != believed_cat:
             if detected_cat > 0:
-                log.info(cats[detected_cat - 1].name + "来了")
+                log.info("猫猫来了")
             else:
                 log.info("猫猫走开了")
             believed_cat = detected_cat
 
-        # 判断要不要喂
-        if believed_cat > 0:
-            if cats[believed_cat - 1].appear():
-                log.info('喂一嘴' + cats[believed_cat - 1].name)
-                servo_controller.feed()
-                mqtt.publish(cats[believed_cat - 1].english_name, time.time())
+        # 判断要不要开门
+        if believed_cat > 0 and time.time() - time_last_open >= open_door_interval:
+            cats[believed_cat-1].feed()
+            log.info('开门')
+            servo_controller.open_door()
+            time_last_open = time.time()
+            mqtt.publish(cats[believed_cat - 1].english_name, time.time())
 
         # 打log
         predict_count += 1  # 记录 get() 调用次数
@@ -96,8 +104,7 @@ def main():
             print("猫猫：%d 检测：%.1f fps." % (believed_cat, predict_count / (time.time() - time_last_print)), end = '  ')
             predict_count = 0
             for cat in cats:
-                print(f"{cat.name}: {cat.feed_count_hour()}/{cat.max_feed_hour}, {cat.feed_count_8h()}/{cat.max_feed_8h}, "
-                    f"{cat.feed_count_day()}/{cat.max_feed_day}", end = "  ")
+                print(f"{cat.name}: {cat.feed_count_hour()}, {cat.feed_count_8h()}, {cat.feed_count_day()}", end = "  ")
             print('')
             time_last_print = time.time()  # 记录打印时间
 

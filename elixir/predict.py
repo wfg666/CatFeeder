@@ -15,7 +15,7 @@ import cv2
 class Predicter:
     def get_args_parser(self):
         parser = argparse.ArgumentParser('cat classification', add_help=False)
-        parser.add_argument('--class_num', default=3, type=int)
+        parser.add_argument('--class_num', default=2, type=int)
         parser.add_argument('--backbone', default='resnet18', type=str)
         parser.add_argument('--device', default='cuda', type=str, help='device to use for training / testing')
         parser.add_argument('--gpu_list', default='0', type=str, help='gpu list for using')

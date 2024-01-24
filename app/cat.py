@@ -44,6 +44,10 @@ class Cat:
             return False
         
         # 喂一点   
+        self.feed()
+
+    def feed(self):
+        now = time.time()
         self.feed_history.append(now)
         try:
             with open(self.filename, "a") as f:

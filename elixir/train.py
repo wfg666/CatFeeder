@@ -22,7 +22,7 @@ logger = logger.get_logger(filename=os.path.join(output_dir, 'train.log'))
 
 def get_args_parser():
     parser = argparse.ArgumentParser('cat classification', add_help=False)
-    parser.add_argument('--class_num', default=3, type=int)
+    parser.add_argument('--class_num', default=2, type=int)
     parser.add_argument('--optimizer', default='Adam', type=str, help='optimizer for training')
     parser.add_argument('--base_lr', default=1e-3, type=float)
     parser.add_argument('--momentum', default=0.9, type=float)
@@ -33,7 +33,6 @@ def get_args_parser():
     parser.add_argument('--num_workers', default=4, type=int)
     parser.add_argument('--start_epoch', default=0, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float, help='gradient clipping max norm')
-    parser.add_argument('--backbone', default='resnet18', type=str)
     parser.add_argument('--device', default='cuda', type=str, help='device to use for training')
     parser.add_argument('--resume', default='', type=str, help='resume model path')
     parser.add_argument('--gpu_list', default='0', type=str, help='gpu list for using')
